@@ -35,8 +35,11 @@ if __name__ == '__main__':
 
         new_address = addresses.insert().values(email='alex@gmail.com', user_id=1)
         print(new_address)
+        result = conn.execute(new_address)
 
         address_select = select(addresses)
         result = conn.execute(address_select)
         for row in result:
             print(row)
+        conn.commit()
+        conn.close()
