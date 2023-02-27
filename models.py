@@ -6,24 +6,23 @@ from sqlalchemy.sql.schema import ForeignKey
 Base = declarative_base()
 
 
-class Groups(Base):
+class Group(Base):
     __tablename__ = "groups"
     id = Column(Integer, primary_key=True)
-    fullname = Column(String(20), nullable=False, unique=True)
-    #
-    # students = relationship('Students', passive_deletes=True)
+    name = Column(String(20), nullable=False, unique=True)
 
-class Students(Base):
+
+class Student(Base):
     __tablename__ = "students"
     id = Column(Integer, primary_key=True)
-    fullname = Column(String(20), nullable=False, unique=True)
-    group_id = Column('group_id', ForeignKey('groups.id'))
-    #
-    # students = relationship('Students', passive_deletes=True)
+    fullname = Column(String(150), nullable=False)
+    group_id = Column('group_id', ForeignKey('groups.id', ondelete='CASCADE'))
+
+    # groups = relationship('Group', backref="notes", passive_deletes=True)
 
 
 
-# class Teachers(Base):
+# class Teacher(Base):
 #     __tablename__ = "teachers"
 #     id = Column(Integer, primary_key=True)
 #     fullname = Column(String(150), nullable=False)
@@ -31,7 +30,7 @@ class Students(Base):
 #     disciplines = relationship('Disciplines', passive_deletes=True)
 #
 #
-# class Disciplines(Base):
+# class Discipline(Base):
 #     __tablename__ = "disciplines"
 #     id = Column(Integer, primary_key=True)
 #     name = Column(String(150), nullable=True)
