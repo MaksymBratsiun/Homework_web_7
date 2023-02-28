@@ -22,6 +22,7 @@ DISCIPLINES = [
 
 fake = Faker()
 
+
 def seed_groups():
     for num_group in GROUPS:
         group = Group(
@@ -35,7 +36,7 @@ def seed_students():
     for _ in range(NUMBER_STUDENTS):
         student = Student(
             fullname=fake.name(),
-            group_id=randint(1, NUMBER_TEACHERS)
+            group_id=randint(1,len(GROUPS))
         )
         session.add(student)
     session.commit()
