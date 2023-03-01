@@ -1,7 +1,8 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.sql.schema import ForeignKey
 
+from connect_db import engine
 
 Base = declarative_base()
 
@@ -17,29 +18,35 @@ class Student(Base):
     id = Column(Integer, primary_key=True)
     fullname = Column(String(150), nullable=False)
     group_id = Column('group_id', ForeignKey('groups.id', ondelete='CASCADE'))
-
-    # groups = relationship('Group', backref="notes", passive_deletes=True)
-
+    group = relationship(Group)
 
 
-# class Teacher(Base):
-#     __tablename__ = "teachers"
-#     id = Column(Integer, primary_key=True)
-#     fullname = Column(String(150), nullable=False)
-#
-#     disciplines = relationship('Disciplines', passive_deletes=True)
-#
-#
-# class Discipline(Base):
-#     __tablename__ = "disciplines"
-#     id = Column(Integer, primary_key=True)
-#     name = Column(String(150), nullable=True)
-#     teacher_id = Column('teacher_id', ForeignKey('teachers.id', ondelete="CASCADE"))
-#
-#     teachers = relationship('Teachers', passive_deletes=True)
-#     grades = relationship('Grades', passive_deletes=True)
+class Teacher(Base):
+    __tablename__ = "teachers"
+    id = Column(Integer, primary_key=True)
+    fullname = Column(String(150), nullable=False)
 
 
+class Discipline(Base):
+    __tablename__ = "disciplines"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(150), nullable=False)
+    teacher_id = Column('teacher_id', ForeignKey('teachers.id', ondelete="CASCADE"))
+
+    teacher = relationship(Teacher)
+    # grades = relationship('Grades', passive_deletes=True)
 
 
+class Grade(Base):
+    __tablename__ = "grades"
+    id = Column(Integer, primary_key=True)
+    grade = Column(Integer, nullable=False)
+    discipline_id = Column('discipline_id', ForeignKey('disciplines.id', ondelete="CASCADE"))
+    student_id = Column('student_id', ForeignKey('students.id', ondelete="CASCADE"))
+    date_of = Column(DateTime, nullable=False)
 
+    discipline = relationship(Discipline)
+    student = relationship(Student)
+
+
+Base.metadata.create_all(engine)
