@@ -1,5 +1,3 @@
-from pprint import pprint
-
 from sqlalchemy import inspect
 
 from connect_db import engine
@@ -9,27 +7,25 @@ import my_select
 
 HELLO_TEXT = '''
 This DB created with Alembic.
-If you have existing tables in this DB and
-    you want to seed or use query input: "Y"
+You need have existing tables in this DB.
 If your DB is clear. Run in terminal
-    >>>"alembic upgrade head"
-    input: "N" for exit and creating DB'''
+    >>>"alembic upgrade head"'''
 
-QUERY_LIST = '''
-Choose any action and input number:
-0. Exit
-1. Знайти 5 студентів із найбільшим середнім балом з усіх предметів.
-2. Знайти студента із найвищим середнім балом з певного предмета.
-3. Знайти середній бал у групах з певного предмета.
-4. Знайти середній бал на потоці (по всій таблиці оцінок).
-5. Знайти які курси читає певний викладач.
-6. Знайти список студентів у певній групі.
-7. Знайти оцінки студентів у окремій групі з певного предмета.
-8. Знайти середній бал, який ставить певний викладач зі своїх предметів.
-9. Знайти список курсів, які відвідує студент.
-10. Список курсів, які певному студенту читає певний викладач.
-11. Середній бал, який певний викладач ставить певному студентові.
-12. Оцінки студентів у певній групі з певного предмета на останньому занятті.'''
+QUERY_LIST = [
+    '0. Exit',
+    '1. Знайти пять студентів із найбільшим середнім балом з усіх предметів.',
+    '2. Знайти студента із найвищим середнім балом з певного предмета.',
+    '3. Знайти середній бал у групах з певного предмета.',
+    '4. Знайти середній бал на потоці (по всій таблиці оцінок).',
+    '5. Знайти які курси читає певний викладач.',
+    '6. Знайти список студентів у певній групі.',
+    '7. Знайти оцінки студентів у окремій групі з певного предмета.',
+    '8. Знайти середній бал, який ставить певний викладач зі своїх предметів.',
+    '9. Знайти список курсів, які відвідує студент.',
+    '10. Список курсів, які певному студенту читає певний викладач.',
+    '11. Середній бал, який певний викладач ставить певному студентові.',
+    '12. Оцінки студентів у певній групі з певного предмета на останньому занятті.'
+]
 
 HANDLER_SELECT = {
     '1': my_select.select_1,
@@ -70,43 +66,38 @@ def seed_all():
         print(err)
 
 
-if __name__ == '__main__':
+def main():
     print(HELLO_TEXT)
     user_input = ''
-    db_has_tables = db_exists()
-    while True:
-        user_input = input('Do you create empty BD tables? (Y/N): ')
-        user_input = user_input.strip().lower()
-        if user_input == 'y':
-            if db_has_tables:
-                print('You have correct DB')
-                break
-            else:
-                print('Your DB has wrong structure. Exit and create new DB.')
-        elif user_input == 'n':
-            exit()
+    if db_exists():
+        print('You have correct DB')
+    else:
+        print('Your DB has wrong structure. Exit and create correct DB with empty tables.')
+        exit()
 
-    while True:
-        user_input = input('Do you want to seed tables? (Y/N): ')
-        user_input = user_input.strip().lower()
-        db_has_info = my_select.select_seeded()
-        if user_input == 'y':
-            if not db_has_info:
+    db_has_info = my_select.select_seeded()
+    if db_has_info:
+        print('DB has info in tables')
+    else:
+        while True:
+            user_input = input('Do you want to seed tables? (Y/N): ')
+            user_input = user_input.strip().lower()
+            if user_input == 'y':
                 seed_all()
                 print('Seed DB completed')
-            else:
-                print('DB has info.\nExit, clear tables and make new seed \nor continue with this info')
-        elif user_input == 'n':
-            break
+            elif user_input == 'n':
+                break
 
-    print(QUERY_LIST)
-
+    print('Choose any action and input number:')
+    for row in QUERY_LIST:
+        print(row)
     while True:
         user_input = input('Input action?(0-12): ')
         user_input = user_input.strip().lower()
         if user_input == '0':
             break
         if user_input in HANDLER_SELECT:
+            print(QUERY_LIST[int(user_input)])
             try:
                 str_query = str(get_handler(user_input)())
                 print(str_query)
@@ -115,3 +106,6 @@ if __name__ == '__main__':
         else:
             print(f'Incorrect input: {user_input}. Try again...')
 
+
+if __name__ == '__main__':
+    main()

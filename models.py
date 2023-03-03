@@ -18,7 +18,7 @@ class Student(Base):
     id = Column(Integer, primary_key=True)
     fullname = Column(String(150), nullable=False)
     group_id = Column('group_id', ForeignKey('groups.id', ondelete='CASCADE'))
-    group = relationship(Group)
+    group = relationship("Group", backref="students")
 
 
 class Teacher(Base):
@@ -33,8 +33,7 @@ class Discipline(Base):
     name = Column(String(150), nullable=False)
     teacher_id = Column('teacher_id', ForeignKey('teachers.id', ondelete="CASCADE"))
 
-    teacher = relationship(Teacher)
-    # grades = relationship('Grades', passive_deletes=True)
+    teacher = relationship("Teacher", backref="disciplines")
 
 
 class Grade(Base):
@@ -45,8 +44,8 @@ class Grade(Base):
     student_id = Column('student_id', ForeignKey('students.id', ondelete="CASCADE"))
     date_of = Column(DateTime, nullable=False)
 
-    discipline = relationship(Discipline)
-    student = relationship(Student)
+    discipline = relationship("Discipline",  backref="grades")
+    student = relationship("Student", backref="grades")
 
 
 Base.metadata.create_all(engine)

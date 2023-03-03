@@ -1,4 +1,4 @@
-from sqlalchemy import func, desc, and_
+from sqlalchemy import func, desc, and_, select
 
 from connect_db import session
 from models import Student, Group, Discipline, Teacher, Grade
@@ -32,7 +32,7 @@ def select_1():
     return '\n'.join(result_list)
 
 
-def select_2():
+def select_2(disc_id=1):
     res_query = session.query(Discipline.name,
                               Student.fullname,
                               func.round(func.avg(Grade.grade), 2).label('avg_grade')
@@ -40,14 +40,14 @@ def select_2():
         .select_from(Grade) \
         .join(Student) \
         .join(Discipline) \
-        .filter(Discipline.id == 1) \
+        .filter(Discipline.id == disc_id) \
         .group_by(Student.id, Discipline.name) \
         .order_by(desc('avg_grade')) \
         .limit(1).all()
     return f'{res_query[0][0]} - {res_query[0][1]}: {res_query[0][2]}'
 
 
-def select_3():
+def select_3(disc_id=1):
     result_list = []
     res_query = session.query(Discipline.name,
                               Group.name,
@@ -57,7 +57,7 @@ def select_3():
         .join(Student) \
         .join(Discipline) \
         .join(Group) \
-        .filter(Discipline.id == 1) \
+        .filter(Discipline.id == disc_id) \
         .group_by(Discipline.name, Group.name) \
         .order_by(Group.name) \
         .all()
@@ -72,14 +72,14 @@ def select_4():
     return f'Average grade: {res_query[0][0]}'
 
 
-def select_5():
+def select_5(teach_id=1):
     result_list = []
     res_query = session.query(Discipline.name,
                               Teacher.fullname
                               ) \
         .select_from(Discipline) \
         .join(Teacher) \
-        .filter(Teacher.id == 1) \
+        .filter(Teacher.id == teach_id) \
         .group_by(Discipline.name, Teacher.fullname) \
         .all()
     for i in range(len(res_query)):
@@ -87,14 +87,14 @@ def select_5():
     return '\n'.join(result_list)
 
 
-def select_6():
+def select_6(stud_id=1):
     result_list = []
     res_query = session.query(Group.name,
                               Student.fullname
                               ) \
         .select_from(Student) \
         .join(Group) \
-        .filter(Group.id == 1) \
+        .filter(Group.id == stud_id) \
         .group_by(Group.name, Student.fullname) \
         .all()
     for i in range(len(res_query)):
@@ -102,7 +102,7 @@ def select_6():
     return '\n'.join(result_list)
 
 
-def select_7():
+def select_7(group_id=1, disc_id=1):
     result_list = []
     res_query = session.query(Group.name,
                               Discipline.name,
@@ -113,27 +113,27 @@ def select_7():
         .join(Student) \
         .join(Discipline) \
         .join(Group) \
-        .filter(and_(Group.id == 1, Grade.discipline_id == 1)) \
+        .filter(and_(Group.id == group_id, Grade.discipline_id == disc_id)) \
         .all()
     for i in range(len(res_query)):
         result_list.append(f'{res_query[i][0]}, {res_query[i][1]} - {res_query[i][2]}: {res_query[i][3]}')
     return '\n'.join(result_list)
 
 
-def select_8():
+def select_8(teach_id=1):
     res_query = session.query(Teacher.fullname,
                               func.round(func.avg(Grade.grade), 2).label('avg_grade')
                               ) \
         .select_from(Grade) \
         .join(Discipline) \
         .join(Teacher) \
-        .filter(Teacher.id == 1) \
+        .filter(Teacher.id == teach_id) \
         .group_by(Teacher.fullname) \
         .all()
     return f'{res_query[0][0]}: {res_query[0][1]}'
 
 
-def select_9():
+def select_9(stud_id=1):
     result_list = []
     res_query = session.query(Discipline.name,
                               Student.fullname,
@@ -141,7 +141,7 @@ def select_9():
         .select_from(Grade) \
         .join(Student) \
         .join(Discipline) \
-        .filter(Student.id == 1)\
+        .filter(Student.id == stud_id)\
         .group_by(Student.id, Discipline.name) \
         .all()
     for i in range(len(res_query)):
@@ -149,7 +149,7 @@ def select_9():
     return '\n'.join(result_list)
 
 
-def select_10():
+def select_10(stud_id=1, teach_id=1):
     result_list = []
     res_query = session.query(Discipline.name.label('discipline'),
                               Student.fullname.label('student'),
@@ -159,7 +159,7 @@ def select_10():
         .join(Student) \
         .join(Discipline) \
         .join(Teacher) \
-        .filter(and_(Student.id == 1, Teacher.id == 1))\
+        .filter(and_(Student.id == stud_id, Teacher.id == teach_id))\
         .group_by(Student.fullname, Discipline.name, Teacher.fullname) \
         .all()
     for i in range(len(res_query)):
@@ -167,7 +167,7 @@ def select_10():
     return '\n'.join(result_list)
 
 
-def select_11():
+def select_11(stud_id=1, teach_id=1):
     res_query = session.query(Student.fullname.label('student'),
                               Teacher.fullname.label('teacher'),
                               func.round(func.avg(Grade.grade), 2).label('avg_grade')
@@ -176,15 +176,31 @@ def select_11():
         .join(Student) \
         .join(Discipline) \
         .join(Teacher) \
-        .filter(and_(Student.id == 1, Teacher.id == 1)) \
+        .filter(and_(Student.id == stud_id, Teacher.id == teach_id)) \
         .group_by(Teacher.fullname, Student.fullname) \
         .all()
     return f'{res_query[0][1]} - {res_query[0][0]} :{res_query[0][2]}'
 
 
-def select_12():
-    return 'Sorry. This chapter is under work.'
+def select_12(disc_id=1, group_id=1):
+    subquery = (select(Grade.date_of).join(Student).join(Group).where(
+                and_(Grade.discipline_id == disc_id, Group.id == group_id))
+                .order_by(desc(Grade.date_of)).limit(1).scalar_subquery())
 
-
-# if __name__ == '__main__':
-#     print(select_11())
+    res_query = session.query(Discipline.name,
+                              Student.fullname,
+                              Group.name,
+                              Grade.date_of,
+                              Grade.grade
+                              ) \
+        .select_from(Grade) \
+        .join(Student) \
+        .join(Discipline) \
+        .join(Group) \
+        .filter(and_(Discipline.id == disc_id,
+                     Group.id == group_id,
+                     Grade.date_of == subquery))\
+        .order_by(desc(Grade.date_of))\
+        .all()
+    date_of = res_query[0][3].strftime("%d.%m.%Y")
+    return f'{res_query[0][0]} {date_of} - {res_query[0][2]} {res_query[0][1]}: {res_query[0][4]}'
