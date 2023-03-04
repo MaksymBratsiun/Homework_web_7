@@ -70,14 +70,14 @@ def main():
     print(HELLO_TEXT)
     user_input = ''
     if db_exists():
-        print('You have correct DB')
+        print('---------You have correct DB------------')
     else:
         print('Your DB has wrong structure. Exit and create correct DB with empty tables.')
         exit()
 
     db_has_info = my_select.select_seeded()
     if db_has_info:
-        print('DB has info in tables')
+        print('---------DB has info in tables----------')
     else:
         while True:
             user_input = input('Do you want to seed tables? (Y/N): ')

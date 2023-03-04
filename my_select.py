@@ -204,3 +204,33 @@ def select_12(disc_id=1, group_id=1):
         .all()
     date_of = res_query[0][3].strftime("%d.%m.%Y")
     return f'{res_query[0][0]} {date_of} - {res_query[0][2]} {res_query[0][1]}: {res_query[0][4]}'
+
+
+def select_group():
+    result = session.query(Group.id, Group.name).select_from(Group).all()
+    return result
+
+
+def select_teacher():
+    result = session.query(Teacher.id, Teacher.fullname).select_from(Teacher).all()
+    return result
+
+
+def select_student():
+    result = session.query(Student.id, Student.fullname, Student.group_id).select_from(Student).all()
+    return result
+
+
+def select_discipline():
+    result = session.query(Discipline.id, Discipline.name, Discipline.teacher_id).select_from(Discipline).all()
+    return result
+
+
+def select_grade():
+    result = session.query(Grade.id,
+                           Grade.grade,
+                           Grade.discipline_id,
+                           Grade.student_id,
+                           Grade.date_of)\
+        .select_from(Grade).all()
+    return result
